@@ -4,6 +4,10 @@ import cvzone
 
 confidence = 0.8
 save = True
+
+#Larger is more focus 
+blurThreshold = 35 
+
 offsetPercentageWidth = 10
 offsetPercentageHeight = 20
 camWidth, camHeight = 640, 480
@@ -16,6 +20,11 @@ detector = FaceDetector()
 while True:
     success, img = cap.read()
     img, bboxs = detector.findFaces(img, draw = False)
+    
+    # True False values indicating if the faces are blur or not
+    listBlur = []
+    # The normalized values and the class name for the label txt file
+    listInfo = []
     
     if bboxs:
         # bboxInfo - "id", "bbox", "score", "center"
@@ -45,6 +54,10 @@ while True:
                 imgFace = img[y:y + h, x:x + w]
                 cv2.imshow("Face", imgFace)
                 blurValue = int(cv2.Laplacian(imgFace, cv2.CV_64F).var())
+                if blurValue > blurThreshold:
+                    listBlur.append(True)
+                else:
+                    listBlur.append(False)
                 
                 # Normalize Values
                 ih, iw, _ = img.shape
@@ -64,7 +77,7 @@ while True:
                 cvzone.putTextRect(img,f'Score: {int(score * 100)}% Blur: {blurValue}', (x,y-20), scale = 2, thickness = 3)
                 
         if save:
-            pass
+            print(listBlur, all(listBlur))
                 
         
     cv2.imshow("Image", img)
