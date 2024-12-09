@@ -3,6 +3,8 @@ import cv2
 import cvzone
 from time import time
 
+# 0 is fake, 1 is real
+classID = 0
 output = 'Dataset/DataCollection'
 confidence = 0.8
 save = True
@@ -74,6 +76,8 @@ while True:
                 if ycn > 1: ycn = 1
                 if wn > 1: wn = 1 
                 if hn > 1: hn = 1 
+                
+                listInfo.append(f"{classID} {xcn} {ycn} {wn} {hn}\n")
             
                 # Drawing
                 cv2.rectangle(imgOut, (x, y, w, h), (255, 0, 0), 3)
@@ -91,8 +95,12 @@ while True:
                 timeNow = str(timeNow).split('.')
                 timeNow = timeNow[0] + timeNow[1]
                 cv2.imwrite(f"{output}/{timeNow}.jpg", img)
-                 
                 
+                # Save label text file
+                for info in listInfo:
+                    f = open(f"{output}/{timeNow}.txt", 'a')
+                    f.write(info)
+                    f.close()                
         
     cv2.imshow("Image", imgOut)
     cv2.waitKey(1)
