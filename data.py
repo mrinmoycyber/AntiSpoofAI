@@ -1,13 +1,15 @@
 from cvzone.FaceDetectionModule import FaceDetector
 import cv2
 import cvzone
+from time import time
 
+output = 'Dataset/DataCollection'
 confidence = 0.8
 save = True
-
 #Larger is more focus 
-blurThreshold = 35 
+blurThreshold = 35
 
+debug = False 
 offsetPercentageWidth = 10
 offsetPercentageHeight = 20
 camWidth, camHeight = 640, 480
@@ -19,6 +21,7 @@ cap.set(4, camHeight)
 detector = FaceDetector()
 while True:
     success, img = cap.read()
+    imgOut = img.copy()
     img, bboxs = detector.findFaces(img, draw = False)
     
     # True False values indicating if the faces are blur or not
@@ -64,7 +67,7 @@ while True:
                 xc, yc = x + w / 2, y + h  / 2
                 xcn, ycn = round(xc / iw, floatingPoint), round(yc / ih, floatingPoint)
                 wn, hn = round(w / iw, floatingPoint), round(h / ih, floatingPoint)
-                print(xcn, ycn, wn, hn)
+                #print(xcn, ycn, wn, hn)
                 
                 # To avoid values above 1 
                 if xcn > 1: xcn = 1 
@@ -73,12 +76,23 @@ while True:
                 if hn > 1: hn = 1 
             
                 # Drawing
-                cv2.rectangle(img, (x, y, w, h), (255, 0, 0), 3)
-                cvzone.putTextRect(img,f'Score: {int(score * 100)}% Blur: {blurValue}', (x,y-20), scale = 2, thickness = 3)
+                cv2.rectangle(imgOut, (x, y, w, h), (255, 0, 0), 3)
+                cvzone.putTextRect(imgOut,f'Score: {int(score * 100)}% Blur: {blurValue}', (x,y-20), scale = 2, thickness = 3)
                 
+                if debug:
+                    cv2.rectangle(img, (x, y, w, h), (255, 0, 0), 3)
+                    cvzone.putTextRect(img,f'Score: {int(score * 100)}% Blur: {blurValue}', (x,y-20), scale = 2, thickness = 3)
+                
+        # Save               
         if save:
-            print(listBlur, all(listBlur))
+            if all(listBlur) and listBlur != []:
+                # Save Image
+                timeNow = time()
+                timeNow = str(timeNow).split('.')
+                timeNow = timeNow[0] + timeNow[1]
+                cv2.imwrite(f"{output}/{timeNow}.jpg", img)
+                 
                 
         
-    cv2.imshow("Image", img)
+    cv2.imshow("Image", imgOut)
     cv2.waitKey(1)
